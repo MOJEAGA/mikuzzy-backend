@@ -18,6 +18,19 @@ def index():
 @app.route('/add_customer', methods=['POST'])
 def add_customer():
     try:
+     all_customers = []
+        # Go to the 'customers' drawer and get every document
+        docs = db.collection('customers').stream()
+        for doc in docs:
+            customer = doc.to_dict()
+            customer['id'] = doc.id # Add the unique ID
+            all_customers.append(customer)
+        
+        # Send the entire list back as the response
+        return jsonify(all_customers), 200
+    except Exception as e:
+        print(f"An error occurred fetching customers: {e}")
+        return jsonify({"status": "error", "message": "Could not fetch customers"}), 500
         customer_data = request.json
         db.collection('customers').add(customer_data)
         return jsonify({"status": "success", "message": "Customer added."}), 201
